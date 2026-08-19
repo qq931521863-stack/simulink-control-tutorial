@@ -2,6 +2,42 @@
 
 All notable changes to this project are documented here.
 
+## [2.1.0] - 2026-08-20
+
+### Added
+- 13 new tutorials in Phase 7 (Nonlinear Filtering) and Phase 8 (Simulink Advanced):
+  - t31: EKF basics — Van der Pol oscillator state estimation with Extended Kalman Filter
+  - t32: EKF pendulum — inverted pendulum state estimation, strong nonlinearity
+  - t33: UKF basics — Unscented Kalman Filter, sigma-point approach (no Jacobian needed)
+  - t34: EKF vs UKF — Monte Carlo comparison across nonlinearity strengths
+  - t35: IMU fusion — gyroscope + accelerometer attitude estimation
+  - t36: Stateflow — state machine, motor start/stop control
+  - t37: Triggered/Enabled Subsystem — conditional execution
+  - t38: Bus signals — signal bundling and extraction
+  - t39: Model Referencing — large-model decomposition
+  - t40: Variant Subsystem — multiple control schemes in one model
+  - t41: Model Callbacks — automatic init/save
+  - t42: S-Function — custom blocks (dead-zone)
+  - t43: Model Advisor — static analysis
+- All 13 tutorials are standalone (Simulink model + MATLAB post-processing)
+- Total tutorials: 30 → 43
+- Comprehensive learning path: Kalman → EKF → UKF → sensor fusion → Stateflow → advanced Simulink
+
+### Changed
+- `run_all_tutorials.m`: added t31-t43 to batch run
+- README badge updated: 30 → 43 lessons
+
+### Fixed
+- t21: sliding mode control u_eq sign (was reversed, caused divergence)
+- t23: rewritten as standard MRAC (same pole, different DC gain); theta* corrected
+- t27/t28: State-Space B matrix, ode45 step input, frequency units (Hz vs rad/s)
+- t29/t30: LQR velocity feedback wiring, suspension damper added
+- t31-t34: EKF F matrix (discrete I+dt*A), UKF alpha parameter
+- t22/t25/t26: lead compensator pole-zero cancellation, honest rename, DH table
+- t24/t36-t43: Simulink wiring/API fixes (fuzzy PI, Stateflow Chart, bus signals, etc.)
+
+## [2.0.0] - 2026-07-18
+
 ## [1.3.0] - 2026-07-18
 
 ### Added

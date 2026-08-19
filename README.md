@@ -1,10 +1,10 @@
 <p align="center">
   <img src="https://img.shields.io/badge/MATLAB-R2020a+-0076A8?style=flat-square&logo=matlab" alt="MATLAB">
   <img src="https://img.shields.io/badge/Simulink-Control_Engineering-FF6600?style=flat-square" alt="Simulink">
-  <img src="https://img.shields.io/badge/Tutorials-30_lessons-blue?style=flat-square" alt="30 Tutorials">
+  <img src="https://img.shields.io/badge/Tutorials-43_lessons-blue?style=flat-square" alt="43 Tutorials">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
   <img src="https://img.shields.io/badge/Language-中文%7CEnglish-red?style=flat-square" alt="Bilingual">
-  <img src="https://img.shields.io/badge/Release-v2.0.0-purple?style=flat-square" alt="v2.0.0">
+  <img src="https://img.shields.io/badge/Release-v2.1.0-purple?style=flat-square" alt="v2.1.0">
   <img src="https://img.shields.io/github/stars/xingd5478-ctrl/simulink-control-tutorial?style=flat-square" alt="Stars">
   <img src="https://img.shields.io/github/last-commit/xingd5478-ctrl/simulink-control-tutorial?style=flat-square" alt="Last Commit">
   <img src="https://img.shields.io/github/actions/workflow/status/xingd5478-ctrl/simulink-control-tutorial/ci.yml?style=flat-square&label=CI" alt="CI">
@@ -12,7 +12,7 @@
 
 <h1 align="center">Simulink 控制工程教程</h1>
 <p align="center">
-  <strong>从零基础到嵌入式代码部署 — 25 课系统学习路径</strong><br>
+  <strong>从零基础到嵌入式代码部署 — 43 课系统学习路径</strong><br>
   覆盖经典控制、现代控制、鲁棒/非线性/MPC、自适应/模糊、物理建模到代码生成
 </p>
 
@@ -78,7 +78,7 @@ git clone https://github.com/xingd5478-ctrl/simulink-control-tutorial.git
 ### 第三步：开始第一课
 
 ```matlab
->> t00_main_guide            % 查看全部 25 课总览
+>> t00_main_guide            % 查看全部 43 课总览
 >> t01_signal_basics         % 第 1 课：正弦波 + 增益 + 示波器
 ```
 
@@ -90,6 +90,9 @@ git clone https://github.com/xingd5478-ctrl/simulink-control-tutorial.git
 % 现代控制 (t09-t12) — 状态空间、LQR、观测器、Kalman
 % 高级控制 (t18-t21, t23, t24) — 鲁棒、MPC、滑模、自适应、模糊
 % 应用部署 (t13, t14, t25, t15) — 电机、Simscape、代码生成
+% 综合案例 (t26-t30) — 机器人、建模、DSP、悬挂
+% 非线性滤波 (t31-t35) — EKF、UKF、IMU 融合
+% Simulink 进阶 (t36-t43) — Stateflow、Bus、模型引用、变体等
 
 % 也可以一键运行全部（比较耗时，建议学完基础后再试）
 >> run_all_tutorials
@@ -165,7 +168,7 @@ git clone https://github.com/xingd5478-ctrl/simulink-control-tutorial.git
 
 ## 教程总览
 
-25 个教程，分五个阶段，按学习路径从基础到工业级应用循序递进。
+43 个教程，分八个阶段，按学习路径从基础到工业级应用循序递进。
 
 ### Phase 1 — Simulink 基础与系统动力学 (t01-t08)
 
@@ -217,24 +220,55 @@ git clone https://github.com/xingd5478-ctrl/simulink-control-tutorial.git
 | t25 | Simscape 物理建模 | 物理元件连线、多域耦合、自动推导 | 免公式推导的建模方法 |
 | t15 | 代码生成 | c2d 离散化、dlqr、C 代码、FreeRTOS | 嵌入式部署 |
 
+### Phase 6 — 综合应用案例 (t26-t30)
+
+| # | 教程 | 核心理论 | 工程价值 |
+|:---:|:---|:---|:---|
+| t26 | 机器人运动学 | DH 参数、正逆运动学、PUMA560 | 机器人控制基础 |
+| t27 | MSD 系统建模 | TF/SS/离散化/数值积分四法对比 | 多角度系统理解 |
+| t28 | DSP 基础 | 采样定理、FFT、窗函数、低通滤波 | 信号处理实战 |
+| t29 | MSD 控制系统 | PID vs LQR + 传感器噪声 | 控制方案对比 |
+| t30 | 主动悬挂控制 | 1/4 车模型 + PID 闭环 | 完整工程案例 |
+
+### Phase 7 — 非线性滤波（NEW） (t31-t35)
+
+| # | 教程 | 核心理论 | 工程价值 |
+|:---:|:---|:---|:---|
+| t31 | EKF 基础 | Van der Pol 振子、Jacobian 局部线性化 | 非线性系统状态估计入门 |
+| t32 | EKF 倒立摆 | 强非线性 sin(θ)、初值收敛 | 经典非线性案例实战 |
+| t33 | UKF | Sigma 点、无迹变换、免 Jacobian | 高精度非线性滤波 |
+| t34 | EKF vs UKF | Monte Carlo 统计对比 | 选型依据 |
+| t35 | IMU 融合 | 陀螺仪+加速度计、互补滤波 vs EKF | 飞控/手机/VR 姿态估计 |
+
+### Phase 8 — Simulink 进阶工程（NEW） (t36-t43)
+
+| # | 教程 | 核心理论 | 工程价值 |
+|:---:|:---|:---|:---|
+| t36 | Stateflow 状态机 | 状态/转移/条件动作 | 逻辑控制建模 |
+| t37 | 触发/使能子系统 | Enabled/Triggered 条件执行 | 嵌入式采样/使能控制 |
+| t38 | Bus 信号 | Bus Creator/Selector 打包拆解 | 大规模信号组织 |
+| t39 | 模型引用 | Model block 子模型复用 | 大模型分解 |
+| t40 | 变体子系统 | Variant Subsystem 方案切换 | A/B 测试、多配置 |
+| t41 | 模型回调 | PreLoad/Init/StopFcn | 自动化初始化/保存 |
+| t42 | S-Function | Level-2 MATLAB S-Function | 自定义模块 |
+| t43 | Model Advisor | 静态分析、代数环检查 | 建模质量把关 |
+
 ---
 
 ## 学习路径
 
 ```
-Phase 1 (基础)       Phase 2 (经典)      Phase 3 (现代)       Phase 4 (高级)       Phase 5 (应用)
-                                                                                
-t01-t08 基础操作 ──→ t16 频域分析 ──→ t09 状态空间 ──→ t18 系统辨识 ──→ t13 DC电机
-                     │                  │                  │                  │
-                     ├── t17 校正器     ├── t10 LQR       ├── t19 H∞鲁棒    ├── t14 FOC
-                     │                  │                  │                  │
-                     └── t22 根轨迹     ├── t11 观测器    ├── t20 MPC       ├── t25 Simscape
-                                        │                  │                  │
-                                        └── t12 Kalman    ├── t21 滑模       └── t15 代码生成
-                                                          │
-                                                          ├── t23 MRAC
-                                                          │
-                                                          └── t24 模糊控制
+Phase 1      Phase 2       Phase 3       Phase 4         Phase 5       Phase 6       Phase 7        Phase 8
+(基础)       (经典)        (现代)        (高级)          (机电)        (综合)        (非线性 NEW!)  (进阶 NEW!)
+
+t01-t08  →  t16 频域  →  t09 状态空间 → t18 辨识  →  t13 DC电机 → t26 运动学 → t31 EKF      → t36 Stateflow
+              ├t17 校正     ├t10 LQR     ├t19 H∞    ├t14 FOC    ├t27 建模   ├t32 EKF实战   ├t37 触发使能
+              └t22 根轨迹   ├t11 观测器   ├t20 MPC    ├t25 Simscape├t28 DSP    ├t33 UKF       ├t38 Bus信号
+                            └t12 Kalman  ├t21 滑模   └t15 代码   ├t29 控制   ├t34 EKFvsUKF   ├t39 模型引用
+                                         ├t23 MRAC               └t30 悬挂   └t35 IMU融合   ├t40 变体
+                                         └t24 模糊                                           ├t41 回调
+                                                                                            ├t42 S-Function
+                                                                                            └t43 Model Advisor
 ```
 
 ---
@@ -283,19 +317,52 @@ t01-t08 基础操作 ──→ t16 频域分析 ──→ t09 状态空间 ─�
 </details>
 
 <details>
-<summary><b>t13, t14, t25, t15 机电系统与部署</b> — 点击展开</summary>
+<summary><b>t13-t15, t25 机电系统与部署</b> — 点击展开</summary>
 
-- **t13 DC 电机**: 电磁转矩 + 机械负载耦合建模，级联 PI（电流环+转速环），LQR 对比
-- **t14 PMSM/FOC**: Clarke → Park 坐标变换，d-q 解耦，SVPWM 原理，矢量控制全流程
-- **t25 Simscape**: 质量-弹簧-阻尼系统物理建模，与传统 Transfer Fcn 对比验证，多物理域耦合概念
-- **t15 代码生成**: 连续→离散 (c2d)，离散 LQR (dlqr)，生成 C 代码，FreeRTOS 集成框架
+- **t13 DC 电机**: 电磁+机械耦合建模，级联 PI 控制，LQR 对比
+- **t14 PMSM/FOC**: Clarke/Park 变换，d-q 解耦，矢量控制
+- **t25 Simscape**: 物理建模—不用推公式，直接放元件
+- **t15 代码生成**: c2d 离散化 → dlqr → C 代码 → FreeRTOS
+</details>
+
+<details>
+<summary><b>t26-t30 综合应用案例</b> — 点击展开</summary>
+
+- **t26 机器人运动学**: DH 参数、正逆运动学、PUMA560 工作空间
+- **t27 MSD 建模**: TF/SS/离散化/数值积分四法对比
+- **t28 DSP 基础**: 采样定理、FFT、窗函数、低通滤波
+- **t29 MSD 控制**: PID vs LQR 一键切换 + 传感器噪声
+- **t30 主动悬挂**: 1/4 车模型、路面→车轮→弹簧→车身→PID 闭环
+</details>
+
+<details>
+<summary><b>t31-t35 非线性滤波（NEW v2.1.0）</b> — 点击展开</summary>
+
+- **t31 EKF 基础**: Van der Pol 振子，EKF 五步循环，Jacobian 局部线性化
+- **t32 EKF 倒立摆**: 强非线性 sin(θ)，从很差的初值收敛
+- **t33 UKF**: Sigma 点采样，无迹变换，不需要 Jacobian
+- **t34 EKF vs UKF**: Monte Carlo 统计对比，μ 扫参
+- **t35 IMU 融合**: 陀螺仪+加速度计姿态估计，互补滤波 vs EKF
+</details>
+
+<details>
+<summary><b>t36-t43 Simulink 进阶工程（NEW v2.1.0）</b> — 点击展开</summary>
+
+- **t36 Stateflow**: 状态机、状态/转移/条件动作，电机启停控制
+- **t37 触发/使能子系统**: Enabled/Triggered 条件执行，采样保持
+- **t38 Bus 信号**: Bus Creator/Selector 打包拆解，按名提取
+- **t39 模型引用**: Model block 引用子模型，独立开发测试
+- **t40 变体子系统**: 一套模型多套方案，变量切换
+- **t41 模型回调**: PreLoad/Init/StopFcn 自动初始化保存
+- **t42 S-Function**: Level-2 MATLAB S-Function 自定义死区模块
+- **t43 Model Advisor**: 静态分析、代数环检查、未连接端口
 </details>
 
 ---
 
 ## 学完后能做什么
 
-完成全部 25 课，你将具备以下能力：
+完成全部 43 课，你将具备以下能力：
 
 - 从物理定律推导状态空间模型
 - 设计 LQR/Kalman 最优控制器和观测器
@@ -319,9 +386,9 @@ t01-t08 基础操作 ──→ t16 频域分析 ──→ t09 状态空间 ─�
 .
 ├── check_setup.m                 # 新手环境检查（运行开始前先跑这个）
 ├── t00_main_guide.m              # 教程索引（运行查看全貌）
-├── t01-t25_*.m                   # 25 个教程主脚本
+├── t01-t43_*.m                   # 43 个教程主脚本
 ├── models/                       # Simulink 模型文件（脚本自动生成）
-│   └── tutorial01-tutorial25.slx
+│   └── tutorial01-tutorial43.slx
 ├── utils/                        # 共享工具函数
 │   └── getSimData.m
 ├── run_all_tutorials.m           # 一键运行全部教程

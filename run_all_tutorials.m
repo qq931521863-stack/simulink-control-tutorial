@@ -1,5 +1,5 @@
 function run_all_tutorials()
-%RUN_ALL_TUTORIALS 一键依次运行全部 30 个教程
+%RUN_ALL_TUTORIALS 一键依次运行全部 43 个教程
 %
 %   每课运行完毕后暂停，方便查看模型和截图；
 %   所有 Figure 会同时自动保存为 PNG 到 docs/images/，
@@ -44,7 +44,22 @@ tutorials = { ...
     't27_msd_modeling'
     't28_dsp_basics'
     't29_msd_control'
-    't30_active_suspension'};
+    't30_active_suspension'
+    % Phase 7 — 非线性滤波 (新增)
+    't31_ekf_basics'
+    't32_ekf_pendulum'
+    't33_ukf_basics'
+    't34_ekf_vs_ukf'
+    't35_imu_fusion'
+    % Phase 8 — Simulink 进阶 (新增)
+    't36_stateflow_basics'
+    't37_triggered_subsystem'
+    't38_bus_signals'
+    't39_model_referencing'
+    't40_variant_subsystem'
+    't41_callbacks'
+    't42_sfunction_basics'
+    't43_model_advisor'};
 
 outDir = fullfile(fileparts(mfilename('fullpath')), 'docs', 'images');
 if ~exist(outDir, 'dir'), mkdir(outDir); end
