@@ -141,15 +141,12 @@ set_param([mdl '/Sum Fuzzy'], 'Inputs', '|+-');
 hasFuzzy = ~isempty(ver('fuzzy'));
 if hasFuzzy
     try
-        add_block('Fuzzy Logic Toolbox/Fuzzy Logic Controller', ...
-            [mdl '/Fuzzy Controller'], 'Position', [260, 85, 310, 135]);
+        load_system('fuzblock');
+        fz = find_system('fuzblock', 'SearchDepth', 1, 'LookUnderMasks', 'on');
+        fz = fz(contains(fz, 'Fuzzy Logic') & ~contains(fz, 'PID'));
+        add_block(fz{1}, [mdl '/Fuzzy Controller'], 'Position', [260, 85, 310, 135]);
     catch
-        try
-            add_block('fuzblock/Fuzzy Logic Controller', ...
-                [mdl '/Fuzzy Controller'], 'Position', [260, 85, 310, 135]);
-        catch
-            hasFuzzy = false;
-        end
+        hasFuzzy = false;
     end
 end
 if hasFuzzy
@@ -160,6 +157,16 @@ else
     set_param([mdl '/Fuzzy Controller'], 'Gain', '1');
     fprintf('  [注意] Fuzzy Logic Toolbox 未安装，使用 Gain 替代模糊控制器\n');
 end
+
+% de = de/dt（误差变化率），u = ∫Δu dt（把控制增量积分成控制量）
+add_block('simulink/Continuous/Derivative', [mdl '/Deriv_de'], ...
+    'Position', [360, 55, 400, 85]);
+add_block('simulink/Signal Routing/Mux', [mdl '/FuzzyMux'], ...
+    'Position', [360, 90, 365, 120]);
+set_param([mdl '/FuzzyMux'], 'Inputs', '2');
+add_block('simulink/Continuous/Integrator', [mdl '/Int_du'], ...
+    'Position', [360, 125, 400, 155]);
+set_param([mdl '/Int_du'], 'InitialCondition', '0');
 
 % --- PID 对比路径（独立的 Plant 副本）---
 add_block('simulink/Continuous/Transfer Fcn', [mdl '/Plant PID'], ...
@@ -183,8 +190,12 @@ set_param([mdl '/Scope'], 'NumInputPorts', '3');
 % --- 连线 ---
 % 模糊路径
 add_line(mdl, 'Step/1', 'Sum Fuzzy/1');
-add_line(mdl, 'Sum Fuzzy/1', 'Fuzzy Controller/1');
-add_line(mdl, 'Fuzzy Controller/1', 'Plant/1');
+add_line(mdl, 'Sum Fuzzy/1', 'Deriv_de/1');
+add_line(mdl, 'Sum Fuzzy/1', 'FuzzyMux/1');               % e → Mux
+add_line(mdl, 'Deriv_de/1', 'FuzzyMux/2');                % de → Mux
+add_line(mdl, 'FuzzyMux/1', 'Fuzzy Controller/1');        % [e;de] → Fuzzy
+add_line(mdl, 'Fuzzy Controller/1', 'Int_du/1');          % Δu → 积分
+add_line(mdl, 'Int_du/1', 'Plant/1');                     % u → 对象
 add_line(mdl, 'Plant/1', 'Scope/1');
 add_line(mdl, 'Plant/1', 'Sum Fuzzy/2');
 

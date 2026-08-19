@@ -141,24 +141,25 @@ add_block('simulink/Math Operations/Sum', [mdl '/Add Noise'], ...
     'Position', [710, 60, 740, 100]);
 set_param([mdl '/Add Noise'], 'Inputs', '|++', 'IconShape', 'round');
 
-add_line(mdl, 'MSD Plant/1', 'Add Noise/1');
+% Demux 拆分 State-Space 的向量输出 [位移; 速度]
+add_block('simulink/Signal Routing/Demux', [mdl '/Demux'], ...
+    'Position', [640, 60, 675, 120]);
+set_param([mdl '/Demux'], 'Outputs', '2');
+
+add_line(mdl, 'MSD Plant/1', 'Demux/1');              % 向量 [位移;速度] → Demux
+add_line(mdl, 'Demux/1', 'Add Noise/1');              % 位移 → Add Noise
 add_line(mdl, 'Sensor Noise/1', 'Add Noise/2');
 
 % --- 反馈回路 ---
-add_block('simulink/Signal Routing/Demux', [mdl '/Demux'], ...
-    'Position', [790, 65, 820, 105]);
-set_param([mdl '/Demux'], 'Outputs', '2');
-
-add_line(mdl, 'Add Noise/1', 'Demux/1');
-add_line(mdl, 'Demux/1', 'PID Error/2');              % 位移 → PID(-)
+add_line(mdl, 'Add Noise/1', 'PID Error/2');          % 位移(带噪) → PID(-)
 
 % Mux 合并 [位移; 速度] 给 LQR
 add_block('simulink/Signal Routing/Mux', [mdl '/State Mux'], ...
     'Position', [860, 155, 885, 190]);
 set_param([mdl '/State Mux'], 'Inputs', '2');
 
-add_line(mdl, 'Demux/1', 'State Mux/1');
-add_line(mdl, 'Demux/2', 'State Mux/2');
+add_line(mdl, 'Add Noise/1', 'State Mux/1');          % 位移(带噪) → LQR
+add_line(mdl, 'Demux/2', 'State Mux/2');              % 速度 → LQR
 add_line(mdl, 'State Mux/1', 'LQR Ctrl/1');          % [x1;x2] → LQR
 
 % --- 示波器 ---
