@@ -151,7 +151,7 @@ R = 0.005;
 
 % UKF 参数
 n_st = 2;
-alpha_ukf = 1e-3; beta_ukf = 2; kappa_ukf = 0;
+alpha_ukf = 0.5; beta_ukf = 2; kappa_ukf = 0;
 lambda_ukf = alpha_ukf^2 * (n_st + kappa_ukf) - n_st;
 Wm = zeros(2*n_st+1, 1); Wc = zeros(2*n_st+1, 1);
 Wm(1) = lambda_ukf/(n_st+lambda_ukf);

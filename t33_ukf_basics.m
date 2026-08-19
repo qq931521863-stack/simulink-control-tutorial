@@ -181,7 +181,7 @@ fprintf('【Step 2: UKF 估计】\n');
 
 % UKF 参数
 n = 2;                           % 状态维度
-alpha = 1e-3;                    % Sigma 点散布参数 (小→靠近均值)
+alpha = 0.5;                     % Sigma 点散布参数（避免 α 过小导致权重退化）
 beta = 2;                        % 高斯分布最优值
 kappa = 0;                       % 辅助缩放参数
 lambda = alpha^2 * (n + kappa) - n;

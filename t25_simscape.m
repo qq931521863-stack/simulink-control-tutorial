@@ -1,13 +1,16 @@
 %% ============================================================
-% 教程 25：Simscape 物理建模 — 不用推公式的建模方法
+% 教程 25：物理建模 — 力平衡法 vs 传递函数
 %
-% 【Simscape vs 传统 Simulink】
-%   传统 Simulink: 你先推出传递函数 G(s)，再用 Transfer Fcn 模块
-%   Simscape: 你直接放置物理元件（电阻、弹簧、质量块），
-%             连线代表物理连接（电流、力），系统自动推导方程！
+% 【物理建模 vs 数学建模】
+%   数学建模: 先推出传递函数 G(s)，再用 Transfer Fcn 模块
+%   物理建模（力平衡法）: 按 F=ma 直接搭"加速度→速度→位移"积分链，
+%                        不写传递函数，思路更贴近物理直觉
 %
-%   Simulink 是"数学建模"：G(s) = 1/(s²+2s+5)
-%   Simscape 是"物理建模"：放一块质量 + 一个弹簧 + 一个阻尼器
+%   传递函数是"数学建模"：G(s) = 1/(s²+0.5s+4)
+%   力平衡法是"物理建模"：按 F=ma 搭积分链（本课实际演示的方法）
+%
+%   注：MathWorks 的 Simscape 工具箱可用物理元件（Mass/Spring/Damper）
+%       做更彻底的物理建模，但本课用 Simulink 信号框图演示同一思路
 %
 % 【Simscape 的优势】
 %   1. 不需要推导数学方程 → 减少人为错误
@@ -25,18 +28,15 @@
 clear; close all;
 
 fprintf('============================================\n');
-fprintf('  教程 25：Simscape 物理建模\n');
+fprintf('  教程 25：物理建模（力平衡法）\n');
 fprintf('============================================\n\n');
 
-% 检查 Simscape 是否可用
-if isempty(ver('simscape'))
-    error('需要 Simscape 工具箱。如果没有安装，请阅读本脚本了解概念。');
-end
+% 本课用 Simulink 信号框图演示力平衡法，无需 Simscape 工具箱
 
-fprintf('【Simscape 核心理念】\n');
+fprintf('【力平衡法核心理念】\n');
 fprintf('  传统方法: 物理定律 → 微分方程 → 传递函数 → Transfer Fcn 模块\n');
-fprintf('  Simscape: 物理元件 → 连线 → 自动生成方程 → 仿真\n');
-fprintf('  → 省掉了最容易出错的三步推导！\n\n');
+fprintf('  力平衡法: F=ma → 加速度 → 积分 → 速度/位移（不写 G(s)）\n');
+fprintf('  → 省掉了拉普拉斯变换这一步！\n\n');
 
 %% ===== 第 1 步：物理建模 vs 传递函数对比模型 =====
 
@@ -111,7 +111,7 @@ add_line(mdl, 'MSD Physical Model/1', 'Scope/1');
 add_line(mdl, 'Step Force/1', 'MSD Transfer Fcn/1');
 add_line(mdl, 'MSD Transfer Fcn/1', 'Scope/2');
 
-fprintf('【Simscape 概念模型已创建】tutorial25_simscape.slx\n');
+fprintf('【物理模型已创建】tutorial25_simscape.slx\n');
 fprintf('  左侧: MSD 物理模型 (力平衡 + 积分链)\n');
 fprintf('  右侧: 传统传递函数 G(s)=1/(s²+0.5s+4)\n');
 fprintf('  两条路径结果一致，但建模思路完全不同\n\n');
@@ -191,9 +191,9 @@ fprintf('    2. 合并: mẍ + cẋ + kx = F\n');
 fprintf('    3. 拉普拉斯: G(s) = 1/(ms²+cs+k)\n');
 fprintf('    4. 填入 Transfer Fcn 模块\n');
 fprintf('    → 三步推导，一步填错全错\n\n');
-fprintf('  Simscape 流程:\n');
-fprintf('    1. 拖入 Mass, Spring, Damper 元件\n');
-fprintf('    2. 连线（物理连接，不是信号流向）\n');
+fprintf('  力平衡法流程:\n');
+fprintf('    1. 画 F=ma 力平衡图（F_net = F - cv - kx）\n');
+fprintf('    2. 用 Gain/Integrator 搭"加速度→速度→位移"链\n');
 fprintf('    3. 填参数: m=1, k=4, c=0.5\n');
 fprintf('    4. 运行！\n');
 fprintf('    → 零公式推导，直接来自物理直觉\n\n');
@@ -206,8 +206,8 @@ fprintf('  ✗ 纯数学运算 → 用 Simulink 更合适\n');
 fprintf('  ✗ 已有精确传递函数 → 没必要重搭物理模型\n\n');
 
 fprintf('→ 打开 tutorial25_simscape.slx\n');
-fprintf('→ 双击 Mass 模块，把 mass 从 1 改成 5\n');
-fprintf('→ 重新运行 → 观察响应变慢\n');
+fprintf('→ 双击 c_damper 或 k_spring 模块改阻尼/刚度\n');
+fprintf('→ 重新运行 → 观察响应变化\n');
 fprintf('→ 这就是"物理直觉驱动建模"！\n');
 
 save_system(mdl, fullfile(fileparts(mfilename('fullpath')), 'models', [mdl '.slx']));

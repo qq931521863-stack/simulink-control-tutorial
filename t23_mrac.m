@@ -32,17 +32,18 @@ fprintf('============================================\n\n');
 %% ===== 第 1 步：参考模型与被控对象 =====
 
 % 参考模型：我们希望系统表现成的样子
-tau_m = 0.5;   % 参考时间常数（快！）
-sys_model = tf([1], [tau_m, 1]);
+tau = 0.5;    % 公共时间常数（对象和模型相同，这是 MRAC 能完全匹配的前提）
+b_m = 1.0;    % 参考模型直流增益
+sys_model = tf([b_m], [tau, 1]);
 
-% 真实被控对象：参数会变化（我们假装不知道）
-tau_real = 2.0;  % 真实时间常数（比参考模型慢很多）
-sys_real = tf([1], [tau_real, 1]);
+% 真实被控对象：增益未知（比模型小），时间常数与模型相同
+b_p = 0.5;    % 真实对象直流增益（控制器不知道的真实值）
+sys_real = tf([b_p], [tau, 1]);
 
 fprintf('【系统参数】\n');
-fprintf('  参考模型: G_m(s) = 1/(%.1fs+1) — 理想行为（快）\n', tau_m);
-fprintf('  真实系统: G_p(s) = 1/(%.1fs+1) — 实际行为（慢 4 倍）\n', tau_real);
-fprintf('  目标: 通过自适应调整增益，让真实系统追平参考模型\n\n');
+fprintf('  参考模型: G_m(s) = %.0f/(%.1fs+1) — 理想行为\n', b_m, tau);
+fprintf('  真实系统: G_p(s) = %.1f/(%.1fs+1) — 增益未知(真实 %.1f)\n', b_p, tau, b_p);
+fprintf('  目标: 自适应增益 θ 补偿增益差异，使 θ·b_p → b_m\n\n');
 
 %% ===== 第 2 步：Simulink 模型搭建 =====
 
@@ -59,7 +60,7 @@ set_param([mdl '/Step Ref'], 'Time', '0.5', 'After', '2');  % 阶跃到 2
 add_block('simulink/Continuous/Transfer Fcn', [mdl '/Ref Model'], ...
     'Position', [350, 50, 440, 90]);
 set_param([mdl '/Ref Model'], ...
-    'Numerator', '[1]', 'Denominator', ['[' num2str(tau_m) ' 1]']);
+    'Numerator', num2str(b_m), 'Denominator', ['[' num2str(tau) ' 1]']);
 
 % --- 自适应控制器路径 ---
 % Apply Gain 模块：计算 θ(t) * r(t)，直接驱动被控对象
@@ -70,7 +71,7 @@ set_param([mdl '/Apply Gain'], 'Inputs', '2');
 add_block('simulink/Continuous/Transfer Fcn', [mdl '/Real Plant'], ...
     'Position', [350, 160, 440, 200]);
 set_param([mdl '/Real Plant'], ...
-    'Numerator', '[1]', 'Denominator', ['[' num2str(tau_real) ' 1]']);
+    'Numerator', num2str(b_p), 'Denominator', ['[' num2str(tau) ' 1]']);
 
 % --- 固定增益对比路径 ---
 add_block('simulink/Math Operations/Gain', [mdl '/Fixed Gain'], ...
@@ -80,7 +81,7 @@ set_param([mdl '/Fixed Gain'], 'Gain', '3.0');
 add_block('simulink/Continuous/Transfer Fcn', [mdl '/Real Plant Fixed'], ...
     'Position', [350, 310, 440, 350]);
 set_param([mdl '/Real Plant Fixed'], ...
-    'Numerator', '[1]', 'Denominator', ['[' num2str(tau_real) ' 1]']);
+    'Numerator', num2str(b_p), 'Denominator', ['[' num2str(tau) ' 1]']);
 
 % --- MIT 自适应律：θ̇ = -γ · e · ym ---
 add_block('simulink/Math Operations/Add', [mdl '/Error Calc'], ...
@@ -167,16 +168,16 @@ K_fixed = 3.0;   % 固定增益
 
 % 欧拉仿真
 for k = 1:N-1
-    % 参考模型: τm·ẏm + ym = r
-    ym_dot = (r(k) - ym(k)) / tau_m;
+    % 参考模型: τ·ẏm + ym = b_m·r
+    ym_dot = (b_m * r(k) - ym(k)) / tau;
     ym(k+1) = ym(k) + ym_dot * dt;
 
-    % 自适应对象: τp·ẏp + yp = θ·r
-    yp_dot = (theta(k) * r(k) - yp_adapt(k)) / tau_real;
+    % 自适应对象: τ·ẏp + yp = θ·b_p·r
+    yp_dot = (theta(k) * b_p * r(k) - yp_adapt(k)) / tau;
     yp_adapt(k+1) = yp_adapt(k) + yp_dot * dt;
 
     % 固定增益对象
-    yp_dot_f = (K_fixed * r(k) - yp_fixed(k)) / tau_real;
+    yp_dot_f = (K_fixed * b_p * r(k) - yp_fixed(k)) / tau;
     yp_fixed(k+1) = yp_fixed(k) + yp_dot_f * dt;
 
     % MIT 规则：dθ/dt = -γ · (yp - ym) · ym
@@ -187,30 +188,30 @@ end
 
 %% ===== 第 4 步：系统参数突变 — 自适应 vs 固定 =====
 
-% 5 秒时 τ_real 从 2.0 突变为 4.0
-tau_init = tau_real;
-tau_change_time = 5;
-tau_changed = 4.0;
+% 5 秒时对象增益 b_p 从 0.5 突变为 0.25
+b_p_init = b_p;
+b_change_time = 5;
+b_p_changed = 0.25;
 
 ym2 = zeros(1, N);  yp_a2 = zeros(1, N);
 yp_f2 = zeros(1, N);  theta2 = zeros(1, N);
 theta2(1) = 1.0;
 
 for k = 1:N-1
-    % 当前真实时间常数
-    if t(k) < tau_change_time
-        tau_now = tau_init;
+    % 当前真实对象增益
+    if t(k) < b_change_time
+        b_now = b_p_init;
     else
-        tau_now = tau_changed;
+        b_now = b_p_changed;
     end
 
-    ym_dot = (r(k) - ym2(k)) / tau_m;
+    ym_dot = (b_m * r(k) - ym2(k)) / tau;
     ym2(k+1) = ym2(k) + ym_dot * dt;
 
-    yp_dot = (theta2(k) * r(k) - yp_a2(k)) / tau_now;
+    yp_dot = (theta2(k) * b_now * r(k) - yp_a2(k)) / tau;
     yp_a2(k+1) = yp_a2(k) + yp_dot * dt;
 
-    yp_dot_f = (K_fixed * r(k) - yp_f2(k)) / tau_now;
+    yp_dot_f = (K_fixed * b_now * r(k) - yp_f2(k)) / tau;
     yp_f2(k+1) = yp_f2(k) + yp_dot_f * dt;
 
     e_adapt = yp_a2(k) - ym2(k);
@@ -236,11 +237,11 @@ xlabel('时间 (s)'); ylabel('输出'); grid on;
 % 图2：自适应增益变化
 subplot(2,2,2); hold on;
 plot(t, theta, 'r', 'LineWidth', 1.5);
-yline(1, 'b--', 'LineWidth', 1);  % 理论最优值 θ* = 1（直流增益匹配）
-text(t_end*0.6, 1*1.1, '理论最优 θ*=1（直流增益匹配）');
+yline(b_m/b_p, 'b--', 'LineWidth', 1);  % 理论最优 θ* = b_m/b_p
+text(t_end*0.6, b_m/b_p*1.1, sprintf('理论最优 θ*=b_m/b_p=%.1f', b_m/b_p));
 title('自适应增益 θ(t)');
 xlabel('时间 (s)'); ylabel('增益'); grid on;
-fprintf('  理论最优增益: θ* = 1 (直流增益匹配，G_p(0)=G_m(0)=1)\n');
+fprintf('  理论最优增益: θ* = %.1f (b_m/b_p = %.1f/%.1f)\n', b_m/b_p, b_m, b_p);
 fprintf('  MIT 自适应最终收敛于 θ* 附近 ✓\n\n');
 
 % 图3：参数突变工况
@@ -249,18 +250,19 @@ plot(t, r, 'k--', 'LineWidth', 1);
 plot(t, ym2, 'b', 'LineWidth', 1.5);
 plot(t, yp_a2, 'r', 'LineWidth', 1.5);
 plot(t, yp_f2, 'Color', [0 0.6 0], 'LineWidth', 1);
-xline(tau_change_time, 'k:', 'LineWidth', 1.5);
-text(tau_change_time+0.2, 2.5, '参数突变!');
+xline(b_change_time, 'k:', 'LineWidth', 1.5);
+text(b_change_time+0.2, 2.5, '参数突变!');
 legend('目标', '参考模型', '自适应', '固定增益', 'Location', 'southeast');
-title(sprintf('参数突变 (τ: %.1f→%.1f) 时对比', tau_init, tau_changed));
+title(sprintf('参数突变 (b_p: %.2f→%.2f) 时对比', b_p_init, b_p_changed));
 xlabel('时间 (s)'); ylabel('输出'); grid on;
 
 % 图4：突变后增益重新调整
 subplot(2,2,4); hold on;
 plot(t, theta2, 'r', 'LineWidth', 1.5);
-yline(1, 'b--', 'LineWidth', 1);
-xline(tau_change_time, 'k:', 'LineWidth', 1.5);
-legend('θ(t)', 'θ*=1', 'Location', 'best');
+yline(b_m/b_p_init, 'b--', 'LineWidth', 1);
+yline(b_m/b_p_changed, 'g--', 'LineWidth', 1);
+xline(b_change_time, 'k:', 'LineWidth', 1.5);
+legend('θ(t)', '旧最优值', '新最优值', 'Location', 'best');
 title('参数突变后增益自适应重新收敛');
 xlabel('时间 (s)'); ylabel('增益'); grid on;
 

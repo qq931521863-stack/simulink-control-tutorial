@@ -44,17 +44,21 @@ disp(round(R, 4));
 %% ---------- 第 2 步：读 PUMA560 的 DH 参数表 ----------
 % 每一行是 [a, α, d, θ]，θ 是变量（关节角）
 dh = [
-    0       0       0.672   0;       % Joint 1 — 腰部旋转
-    0.432  -pi/2   0.149   0;       % Joint 2 — 大臂俯仰
-    0.020   pi/2   0       0;       % Joint 3 — 小臂俯仰
-    0       0       0.433   0;       % Joint 4 — 腕部旋转
+    0       0       0.67183 0;       % Joint 1 — 腰部旋转
+    0.4318  0       0       0;       % Joint 2 — 大臂俯仰
+    0.0203 -pi/2    0.15005 0;       % Joint 3 — 小臂俯仰
+    0       pi/2    0.4318  0;       % Joint 4 — 腕部旋转
+    0      -pi/2    0       0;       % Joint 5 — 腕部弯曲
+    0       0       0.2     0;       % Joint 6 — 末端旋转
     ];
 
 fprintf('\n【PUMA560 DH 参数】\n');
 fprintf('  J1(腰): a=%.3f  α=%.0f°      d=%.3f\n', dh(1,1), rad2deg(dh(1,2)), dh(1,3));
 fprintf('  J2(肩): a=%.3f  α=%.0f°     d=%.3f\n', dh(2,1), rad2deg(dh(2,2)), dh(2,3));
 fprintf('  J3(肘): a=%.3f  α=%.0f°      d=%.3f\n', dh(3,1), rad2deg(dh(3,2)), dh(3,3));
-fprintf('  J4(腕): a=%.3f  α=%.0f°      d=%.3f\n\n', dh(4,1), rad2deg(dh(4,2)), dh(4,3));
+fprintf('  J4(腕): a=%.3f  α=%.0f°      d=%.3f\n', dh(4,1), rad2deg(dh(4,2)), dh(4,3));
+fprintf('  J5(腕): a=%.3f  α=%.0f°      d=%.3f\n', dh(5,1), rad2deg(dh(5,2)), dh(5,3));
+fprintf('  J6(腕): a=%.3f  α=%.0f°      d=%.3f\n\n', dh(6,1), rad2deg(dh(6,2)), dh(6,3));
 
 %% ---------- 第 3 步：Simulink 模型 — DH 正运动学 ----------
 
