@@ -118,9 +118,9 @@ for k = 1:N
     s = lambda * e + e_dot;
     s_hist(k) = s;
 
-    u_eq = m * (-c_model/m * x_smc(2) - k_model/m * x_smc(1) + lambda * e_dot);
+    u_eq = m * (c_model/m * x_smc(2) + k_model/m * x_smc(1) - lambda * e_dot);
     u_sw = -K_sw * sign(s);
-    u_smc_val = u_eq + u_sw + k_model * r_k;
+    u_smc_val = u_eq + u_sw;
     u_hist(1,k) = u_smc_val;
 
     % === PID ===
@@ -165,9 +165,9 @@ for ip = 1:length(Phi_list)
         e_dot_sat = x_sat(2);
         s_sat = lambda * e_sat + e_dot_sat;
 
-        u_eq_sat = m * (-c_model/m * x_sat(2) - k_model/m * x_sat(1) + lambda * e_dot_sat);
+        u_eq_sat = m * (c_model/m * x_sat(2) + k_model/m * x_sat(1) - lambda * e_dot_sat);
         u_sw_sat = -K_sw * sat(s_sat / Phi);
-        u_sat_val = u_eq_sat + u_sw_sat + k_model * r(k);
+        u_sat_val = u_eq_sat + u_sw_sat;
         u_sat_hist(ip,k) = u_sat_val;
 
         x_sat(1) = x_sat(1) + x_sat(2) * dt;
