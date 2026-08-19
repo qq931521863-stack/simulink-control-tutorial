@@ -36,6 +36,7 @@ fprintf('============================================\n\n');
 m_s   = 250;      % 车身质量 (kg)
 m_us  = 35;       % 车轮质量 (kg)
 k_sus = 16000;    % 悬挂弹簧刚度 (N/m)
+c_sus = 1000;     % 悬挂减震器阻尼 (N·s/m)
 k_t   = 160000;   % 轮胎刚度 (N/m) — 比弹簧硬 10 倍！
 F_max = 2000;     % 执行器最大出力 (N)
 Kp = 8000;  Ki = 2000;  Kd = 3000;  % PID 参数
@@ -44,6 +45,7 @@ fprintf('【1/4 车模型参数】\n');
 fprintf('  车身 m_s = %d kg  — 乘客在上面\n', m_s);
 fprintf('  车轮 m_us = %d kg  — 贴地而行\n', m_us);
 fprintf('  弹簧 k_s = %d N/m\n', k_sus);
+fprintf('  减震器 c_s = %d N·s/m\n', c_sus);
 fprintf('  轮胎 k_t = %d N/m  (弹簧的 10 倍硬)\n', k_t);
 fprintf('  执行器限幅: ±%d N\n\n', F_max);
 
@@ -69,7 +71,7 @@ set_param([mdl '/Sum_zr_xus'], 'Inputs', '|+-');
 add_block('simulink/Math Operations/Gain', [mdl '/Gain_kt'], 'Position', [300,55,355,80]);
 set_param([mdl '/Gain_kt'], 'Gain', num2str(k_t));
 add_block('simulink/Math Operations/Sum', [mdl '/Sum_F_whl'], 'Position', [440,55,495,80]);
-set_param([mdl '/Sum_F_whl'], 'Inputs', '|+--');
+set_param([mdl '/Sum_F_whl'], 'Inputs', '|+---');
 add_block('simulink/Math Operations/Gain', [mdl '/Gain_1m_us'], 'Position', [580,55,635,80]);
 set_param([mdl '/Gain_1m_us'], 'Gain', num2str(1/m_us));
 add_block('simulink/Continuous/Integrator', [mdl '/Int_v_us'], 'Position', [720,55,775,80]);
@@ -94,7 +96,7 @@ add_line(mdl, 'Gain_ks/1', 'Sum_F_whl/2');
 
 % ===== 车身：SumForce → 1/m_s → ∫→∫ → x_s =====
 add_block('simulink/Math Operations/Sum', [mdl '/Sum_F_bdy'], 'Position', [440,200,495,225]);
-set_param([mdl '/Sum_F_bdy'], 'Inputs', '|++');
+set_param([mdl '/Sum_F_bdy'], 'Inputs', '|+++');
 add_block('simulink/Math Operations/Gain', [mdl '/Gain_1m_s'], 'Position', [580,200,635,225]);
 set_param([mdl '/Gain_1m_s'], 'Gain', num2str(1/m_s));
 add_block('simulink/Continuous/Integrator', [mdl '/Int_v_s'], 'Position', [720,200,775,225]);
@@ -104,6 +106,17 @@ add_line(mdl, 'Sum_F_bdy/1', 'Gain_1m_s/1');
 add_line(mdl, 'Gain_1m_s/1', 'Int_v_s/1');
 add_line(mdl, 'Int_v_s/1', 'Int_x_s/1');
 add_line(mdl, 'Int_x_s/1', 'Sum_xus_xs/2');
+
+% ===== 减震器：F_d = c_sus*(v_us - v_s)，v 为速度 =====
+add_block('simulink/Math Operations/Sum', [mdl '/Sum_vus_vs'], 'Position', [440,260,495,285]);
+set_param([mdl '/Sum_vus_vs'], 'Inputs', '|+-');
+add_block('simulink/Math Operations/Gain', [mdl '/Gain_cs'], 'Position', [580,260,635,285]);
+set_param([mdl '/Gain_cs'], 'Gain', num2str(c_sus));
+add_line(mdl, 'Int_v_us/1', 'Sum_vus_vs/1');
+add_line(mdl, 'Int_v_s/1', 'Sum_vus_vs/2');
+add_line(mdl, 'Sum_vus_vs/1', 'Gain_cs/1');
+add_line(mdl, 'Gain_cs/1', 'Sum_F_whl/4');
+add_line(mdl, 'Gain_cs/1', 'Sum_F_bdy/3');
 
 % ===== PID 控制器 =====
 add_block('simulink/Sources/Constant', [mdl '/Ref_0'], 'Position', [30,280,80,310]);
@@ -160,7 +173,7 @@ fprintf('  [Simulink] tutorial30_suspension.slx 已创建\n');
 fprintf('  模型: 路面→车轮→弹簧→车身→PID→执行器, 完整闭环\n\n');
 
 %% ---------- 状态空间模型 & 对比仿真 ----------
-A_sus = [0,1,0,0; -(k_t+k_sus)/m_us,0,k_sus/m_us,0; 0,0,0,1; k_sus/m_s,0,-k_sus/m_s,0];
+A_sus = [0,1,0,0; -(k_t+k_sus)/m_us,-c_sus/m_us,k_sus/m_us,c_sus/m_us; 0,0,0,1; k_sus/m_s,c_sus/m_s,-k_sus/m_s,-c_sus/m_s];
 B_sus = [0;-1/m_us;0;1/m_s]; B_dist = [0;k_t/m_us;0;0]; C_sus = [0,0,1,0];
 
 sys_passive = ss(A_sus, B_dist, C_sus, 0);

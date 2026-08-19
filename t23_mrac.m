@@ -236,11 +236,11 @@ xlabel('时间 (s)'); ylabel('输出'); grid on;
 % 图2：自适应增益变化
 subplot(2,2,2); hold on;
 plot(t, theta, 'r', 'LineWidth', 1.5);
-yline(2/0.5, 'b--', 'LineWidth', 1);  % 理论最优值 = τp/τm
-text(t_end*0.6, 2/0.5*1.1, sprintf('理论最优 θ*=τp/τm=%.1f', tau_real/tau_m));
+yline(1, 'b--', 'LineWidth', 1);  % 理论最优值 θ* = 1（直流增益匹配）
+text(t_end*0.6, 1*1.1, '理论最优 θ*=1（直流增益匹配）');
 title('自适应增益 θ(t)');
 xlabel('时间 (s)'); ylabel('增益'); grid on;
-fprintf('  理论最优增益: θ* = %.1f (真实系统/参考模型)\n', tau_real/tau_m);
+fprintf('  理论最优增益: θ* = 1 (直流增益匹配，G_p(0)=G_m(0)=1)\n');
 fprintf('  MIT 自适应最终收敛于 θ* 附近 ✓\n\n');
 
 % 图3：参数突变工况
@@ -258,10 +258,9 @@ xlabel('时间 (s)'); ylabel('输出'); grid on;
 % 图4：突变后增益重新调整
 subplot(2,2,4); hold on;
 plot(t, theta2, 'r', 'LineWidth', 1.5);
-yline(tau_init/tau_m, 'b--', 'LineWidth', 1);
-yline(tau_changed/tau_m, 'g--', 'LineWidth', 1);
+yline(1, 'b--', 'LineWidth', 1);
 xline(tau_change_time, 'k:', 'LineWidth', 1.5);
-legend('θ(t)', '旧最优值', '新最优值', 'Location', 'best');
+legend('θ(t)', 'θ*=1', 'Location', 'best');
 title('参数突变后增益自适应重新收敛');
 xlabel('时间 (s)'); ylabel('增益'); grid on;
 

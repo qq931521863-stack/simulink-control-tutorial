@@ -174,7 +174,7 @@ fprintf('  双击 Manual Switch 切换控制器和信号类型\n\n');
 
 %% ---------- 第 4 步：阶跃响应对比 ----------
 [y_open, t_open] = step(tf([1], [m, c, k_s]), 5);
-sys_cl = ss(A - B*K_lqr, B, C, D);
+sys_cl = ss(A - B*K_lqr, B*K_lqr(1), C, D);
 [y_lqr, t_lqr] = step(sys_cl, 5);
 
 figure('Name', 't29: PID vs LQR', 'Position', [50, 50, 800, 400]);

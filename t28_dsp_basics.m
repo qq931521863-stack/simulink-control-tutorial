@@ -86,12 +86,12 @@ open_system(mdl);
 % 50Hz 主力信号
 add_block('simulink/Sources/Sine Wave', [mdl '/50Hz Signal'], ...
     'Position', [50, 60, 110, 90]);
-set_param([mdl '/50Hz Signal'], 'Frequency', '50', 'Amplitude', '1');
+set_param([mdl '/50Hz Signal'], 'Frequency', num2str(2*pi*50), 'Amplitude', '1');
 
 % 120Hz 干扰信号
 add_block('simulink/Sources/Sine Wave', [mdl '/120Hz Noise'], ...
     'Position', [50, 150, 110, 180]);
-set_param([mdl '/120Hz Noise'], 'Frequency', '120', 'Amplitude', '0.5');
+set_param([mdl '/120Hz Noise'], 'Frequency', num2str(2*pi*120), 'Amplitude', '0.5');
 
 % 随机噪声
 add_block('simulink/Sources/Band-Limited White Noise', [mdl '/Random Noise'], ...
@@ -106,12 +106,13 @@ add_line(mdl, '50Hz Signal/1', 'Signal Mixer/1');
 add_line(mdl, '120Hz Noise/1', 'Signal Mixer/2');
 add_line(mdl, 'Random Noise/1', 'Signal Mixer/3');
 
-% 低通滤波器 — 截止频率约 100Hz，滤掉 120Hz 和部分噪声
+% 低通滤波器 — Butterworth 二阶，截止约 100 Hz（通 50 Hz、阻 120 Hz）
+wc = 2*pi*100;                    % 100 Hz → 628.3 rad/s
 add_block('simulink/Continuous/Transfer Fcn', [mdl '/Low Pass Filter'], ...
     'Position', [300, 140, 390, 190]);
 set_param([mdl '/Low Pass Filter'], ...
-    'Numerator', '[10000]', ...
-    'Denominator', '[1 200 10000]');    % ωc ≈ 100 rad/s
+    'Numerator', sprintf('[%.0f]', wc^2), ...
+    'Denominator', sprintf('[1 %.1f %.0f]', sqrt(2)*wc, wc^2));   % ωc = 2π·100 rad/s
 
 add_line(mdl, 'Signal Mixer/1', 'Low Pass Filter/1');
 
